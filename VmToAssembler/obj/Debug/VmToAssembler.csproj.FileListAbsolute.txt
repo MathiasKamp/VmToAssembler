@@ -1,0 +1,7 @@
+D:\projects\DotNetProjects\VmToAssembler\VmToAssembler\bin\Debug\VmToAssembler.exe
+D:\projects\DotNetProjects\VmToAssembler\VmToAssembler\bin\Debug\VmToAssembler.pdb
+D:\projects\DotNetProjects\VmToAssembler\VmToAssembler\obj\Debug\VmToAssembler.csproj.AssemblyReference.cache
+D:\projects\DotNetProjects\VmToAssembler\VmToAssembler\obj\Debug\VmToAssembler.csproj.SuggestedBindingRedirects.cache
+D:\projects\DotNetProjects\VmToAssembler\VmToAssembler\obj\Debug\VmToAssembler.csproj.CoreCompileInputs.cache
+D:\projects\DotNetProjects\VmToAssembler\VmToAssembler\obj\Debug\VmToAssembler.exe
+D:\projects\DotNetProjects\VmToAssembler\VmToAssembler\obj\Debug\VmToAssembler.pdb
