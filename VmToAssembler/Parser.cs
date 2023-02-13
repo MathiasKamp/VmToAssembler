@@ -22,6 +22,10 @@ namespace VmToAssembler
 
         private CounterHandler CounterHandler { get; }
 
+        private LabelOperations LabelOperations { get; }
+
+        private GotoOperations GotoOperations { get; }
+
 
         public Parser(string file)
         {
@@ -29,7 +33,8 @@ namespace VmToAssembler
             LogicalOperations = new LogicalOperations();
             SpOperations = new SpOperations();
             MemoryAccessOperations = new MemoryAccessOperations();
-
+            LabelOperations = new LabelOperations();
+            GotoOperations = new GotoOperations();
             CounterHandler = new CounterHandler();
             RawVmFileContent = VmFileReader.VmFileContent;
             VmTranslatedToAsm = new List<string>();
@@ -54,7 +59,7 @@ namespace VmToAssembler
         private List<string> HandleEq()
         {
             List<string> eqCommands = new List<string>();
-            
+
             eqCommands.MergeLists(SpOperations.GetMinus());
 
             var counterVal = CounterHandler.CreateNewCounters();
@@ -167,14 +172,67 @@ namespace VmToAssembler
                     VmTranslatedToAsm.MergeLists(HandleSub());
                 }
 
-
                 else if (vmCommand.StartsWith("neg"))
                 {
                     VmTranslatedToAsm.MergeLists(HandleNeg());
                 }
+                else if (vmCommand.StartsWith("label"))
+                {
+                    VmTranslatedToAsm.MergeLists(HandleLabel(vmCommand));
+                }
+
+                else if (vmCommand.StartsWith("if-goto"))
+                {
+                    VmTranslatedToAsm.MergeLists(HandleIfGoto(vmCommand));
+                }
+
+                else if (vmCommand.StartsWith("goto"))
+                {
+                    VmTranslatedToAsm.MergeLists(HandleGoto(vmCommand));
+                }
+
+                else if (vmCommand.StartsWith("function"))
+                {
+                    VmTranslatedToAsm.MergeLists(HandleFunction(vmCommand));
+                }
             }
 
             return VmTranslatedToAsm;
+        }
+
+        private List<string> HandleFunction(string vmCommand)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private List<string> HandleGoto(string vmCommand)
+        {
+            var splitCommand = vmCommand.SplitByWhitespace();
+
+            LabelOperations.AddToLabels(splitCommand[1], splitCommand[1]);
+
+            var label = LabelOperations.GetLabelValue(splitCommand[1], false);
+
+            return GotoOperations.GetGoto(label);
+        }
+
+        private List<string> HandleIfGoto(string vmCommand)
+        {
+            var splitCommand = vmCommand.SplitByWhitespace();
+
+            LabelOperations.AddToLabels(splitCommand[1], splitCommand[1]);
+
+            var label = LabelOperations.GetLabelValue(splitCommand[1], false);
+
+            return GotoOperations.GetIfGoto(label);
+        }
+
+        private List<string> HandleLabel(string vmCommand)
+        {
+            var splitCommand = vmCommand.SplitByWhitespace();
+            LabelOperations.AddToLabels(splitCommand[1], splitCommand[1]);
+
+            return LabelOperations.GetLabelValueList(splitCommand[1], true);
         }
 
         private List<string> HandlePop(string vmCommand)
@@ -183,7 +241,6 @@ namespace VmToAssembler
         }
 
 
-        // adds two stack addresses together
         private List<string> HandleAdd()
         {
             return LogicalOperations.GetAdd();

@@ -6,7 +6,7 @@ namespace VmToAssembler;
 
 public class CounterHandler
 {
-    public Dictionary<int, List<string>> Counters { get; }
+    private Dictionary<int, List<string>> Counters { get; }
     
     private const string FalseCondition = "FALSE";
 
