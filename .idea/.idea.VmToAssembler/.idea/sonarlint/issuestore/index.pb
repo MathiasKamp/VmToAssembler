@@ -9,5 +9,5 @@ N
 VmToAssembler/Utils/SysUtil.cs,d\4\d4239d9aa410b371c08a0a475acee23aebd26be3
 Q
 !VmToAssembler/Utils/StringUtil.cs,5\5\55d741a1560c356dfa471801ca1a1fbbe598fd6f
-M
-VmToAssembler/VmFileReader.cs,a\9\a9bd665ed0cc40ff03b1c44b856559493ed51fe0
+K
+VmToAssembler/FileWriter.cs,f\9\f95634a55aaca3beefaec6d3de8dbc90d388e31b

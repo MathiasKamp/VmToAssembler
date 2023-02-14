@@ -57,5 +57,10 @@ namespace VmToAssembler
         {
             return fileContent.Select(str => commentRegex.Replace(str, "")).ToList();
         }
+
+        public bool HasFunction()
+        {
+            return VmFileContent.Any(str => str.StartsWith("function"));
+        }
     }
 }

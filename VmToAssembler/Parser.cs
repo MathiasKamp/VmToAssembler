@@ -26,12 +26,21 @@ namespace VmToAssembler
 
         private GotoOperations GotoOperations { get; }
 
+        private bool HasFunction { get; }
+
+        private SysOperations SysOperations { get; }
+        
+        private FunctionOperations FunctionOperations { get; }
+
 
         public Parser(string file)
         {
             VmFileReader = new VmFileReader(file);
+            HasFunction = VmFileReader.HasFunction();
             LogicalOperations = new LogicalOperations();
             SpOperations = new SpOperations();
+            SysOperations = new SysOperations();
+            FunctionOperations = new FunctionOperations();
             MemoryAccessOperations = new MemoryAccessOperations();
             LabelOperations = new LabelOperations();
             GotoOperations = new GotoOperations();
@@ -116,9 +125,21 @@ namespace VmToAssembler
             return MemoryAccessOperations.GetPush(command);
         }
 
+        private List<string> HandleReturn()
+        {
+            return SysOperations.GetReturn();
+        }
+
 
         public List<string> ParseVmToAsm()
+
         {
+            // add start with or without a return label
+            VmTranslatedToAsm.MergeLists(HasFunction
+                ? SysOperations.GetStartWithLabel()
+                : SysOperations.GetStartWithoutLabel());
+
+
             foreach (var vmCommand in RawVmFileContent)
             {
                 if (vmCommand.StartsWith("push"))
@@ -195,6 +216,11 @@ namespace VmToAssembler
                 {
                     VmTranslatedToAsm.MergeLists(HandleFunction(vmCommand));
                 }
+                
+                else if (vmCommand.StartsWith("return"))
+                {
+                    VmTranslatedToAsm.MergeLists(HandleReturn());
+                }
             }
 
             return VmTranslatedToAsm;
@@ -202,7 +228,15 @@ namespace VmToAssembler
 
         private List<string> HandleFunction(string vmCommand)
         {
-            throw new System.NotImplementedException();
+            var splitCommand = vmCommand.SplitByWhitespace();
+            
+            var label = splitCommand[1];
+            
+            LabelOperations.AddToLabels(label,label);
+
+            var labelCommand = LabelOperations.GetLabelValueList(label,true);
+
+            return labelCommand.MergeLists(FunctionOperations.GetFunctionOperations(int.Parse(splitCommand[2])));
         }
 
         private List<string> HandleGoto(string vmCommand)

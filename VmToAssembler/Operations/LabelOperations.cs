@@ -13,9 +13,9 @@ public class LabelOperations
         Labels = new Dictionary<string, string>();
     }
 
-    public List<string> GetLabelValueList(string key, bool shouldWrapWithParenthesis)
+    public List<string> GetLabelValueList(string key, bool doWrapInParenthesis)
     {
-        var label = GetLabelValue(key, shouldWrapWithParenthesis);
+        var label = GetLabelValue(key, doWrapInParenthesis);
         
         return new List<string>
         {

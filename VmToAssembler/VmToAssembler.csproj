@@ -43,11 +43,13 @@
         <Compile Include="CounterHandler.cs" />
         <Compile Include="DirectoryHandler.cs" />
         <Compile Include="FileWriter.cs" />
+        <Compile Include="Operations\FunctionOperations.cs" />
         <Compile Include="Operations\GotoOperations.cs" />
         <Compile Include="Operations\LabelOperations.cs" />
         <Compile Include="Operations\LogicalOperations.cs" />
         <Compile Include="Operations\MemoryAccessOperations.cs" />
         <Compile Include="Operations\SpOperations.cs" />
+        <Compile Include="Operations\SysOperations.cs" />
         <Compile Include="Parser.cs" />
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />

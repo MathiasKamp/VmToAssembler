@@ -28,7 +28,7 @@ public class MemoryAccessOperations
         {
             "@LCL",
             "D=M",
-            "@0",
+            "@replaced",
             "A=D+A",
             "D=M"
         });
@@ -208,7 +208,7 @@ public class MemoryAccessOperations
             "M=D"
         });
     }
-
+    
 
     public List<string> GetPush(string command)
     {
