@@ -7,10 +7,13 @@ public class SysOperations
 {
     private Dictionary<string, List<string>> SysOperation { get; }
 
+    private int callLabelNumber;
+
     public SysOperations()
     {
         SysOperation = new Dictionary<string, List<string>>();
         FillSysOperations();
+        callLabelNumber = 0;
     }
 
     private void FillSysOperations()
@@ -21,7 +24,7 @@ public class SysOperations
             "D=A",
             "@SP",
             "M=D",
-            "@RETURN0",
+            "@RETURNLabel",
             "D=A",
             "@SP",
             "A=M",
@@ -70,7 +73,7 @@ public class SysOperations
             "M=D",
             "@Sys.init",
             "0;JMP",
-            "(RETURN0)"
+            "(RETURNLabel)"
         });
 
         SysOperation.Add("startWithoutLabel", new List<string>
@@ -184,7 +187,77 @@ public class SysOperations
             "A=M",
             "0;JMP"
         });
+        
+        SysOperation.Add("call", new List<string>
+        {
+            "@RETURNLabel",
+            "D=A",
+            "@SP",
+            "A=M",
+            "M=D",
+            "@SP",
+            "M=M+1",
+            "@LCL",
+            "D=M",
+            "@SP",
+            "A=M",
+            "M=D",
+            "@SP",
+            "M=M+1",
+            "@ARG",
+            "D=M",
+            "@SP",
+            "A=M",
+            "M=D",
+            "@SP",
+            "M=M+1",
+            "@THIS",
+            "D=M",
+            "@SP",
+            "A=M",
+            "M=D",
+            "@SP",
+            "M=M+1",
+            "@THAT",
+            "D=M",
+            "@SP",
+            "A=M",
+            "M=D",
+            "@SP",
+            "M=M+1",
+            "@SP",
+            "D=M",
+            "@5",
+            "D=D-A",
+            "@argumentCount",
+            "D=D-A",
+            "@ARG",
+            "M=D",
+            "@SP",
+            "D=M",
+            "@LCL",
+            "M=D",
+            "@functionLabel",
+            "0;JMP",
+            "(RETURNLabel)"
+        });
     }
+
+    private int GetNewLabelNumber()
+    {
+        return callLabelNumber++;
+    }
+
+    public List<string> GetCall(string command)
+    {
+        var commandSplit = command.SplitByWhitespace();
+
+        var val = SysOperation.GetValueFromDictionary(commandSplit[0])
+            .UpdateStrWithNewValue("RETURNLabel", $"RETURN{GetNewLabelNumber()}")
+            .UpdateStrWithNewValue("functionLabel", commandSplit[1]).UpdateStrWithNewValue("argumentCount", commandSplit[2]);
+        return val;
+    }
+    
 
     public List<string> GetReturn()
     {
@@ -193,7 +266,7 @@ public class SysOperations
     
     public List<string> GetStartWithLabel()
     {
-        return SysOperation.GetValueFromDictionary("startWithLabel");
+        return SysOperation.GetValueFromDictionary("startWithLabel").UpdateStrWithNewValue("RETURNLabel", $"RETURN{GetNewLabelNumber()}");
     }
     
     public List<string> GetStartWithoutLabel()

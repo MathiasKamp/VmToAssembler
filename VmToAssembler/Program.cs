@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using VmToAssembler.Utils;
 
 namespace VmToAssembler
 {
@@ -10,21 +11,17 @@ namespace VmToAssembler
         {
             if (args.Length > 1)
             {
-                Console.WriteLine("only use 1 argument. ie : full path to .asm file");
-                return;
-            }
-
-            var file = args[0];
-
-            if (!File.Exists(file))
-            {
-                Console.WriteLine($"file {file} does not exists");
+                Console.WriteLine("only use 1 argument. ie : full path to .asm file or a directory of vm files");
                 return;
             }
             
-            var parser = new Parser(file);
+            var fileToProcess = args[0].PathIsDirectory() ? Directory.GetFiles(args[0], "*.vm") : args;
 
-            var asm = parser.ParseVmToAsm();
+            var parser = new Parser(fileToProcess);
+            
+            parser.ParseVmFilesToAsm();
+
+            var asm = parser.VmTranslatedToAsm;
 
             if (!asm.Any())
             {
@@ -32,10 +29,9 @@ namespace VmToAssembler
                 return;
             }
 
-            var fileWriter =  new FileWriter(asm, file);
-            
-            fileWriter.DirectoryHandler.CopySourceVmFileToWorkingDirectory(file);
-            
+            var fileWriter = new FileWriter(args[0], asm);
+
+
             fileWriter.WriteFile();
         }
     }

@@ -7,38 +7,26 @@ namespace VmToAssembler
 {
     public class FileWriter
     {
-        private string VmFileName { get; }
+        private string DirectoryPathOfVmFiles { get; }
 
-        public DirectoryHandler DirectoryHandler { get; }
+        private List<string> Commands { get; }
 
-        private List<string> VmFileContent { get; }
-        
-        private string VmFileWorkingDirectory { get; }
-
-        public FileWriter(List<string> vmFileContent, string vmFileName)
+        public FileWriter(string directoryPathOfVmFiles, List<string> commands)
 
         {
-            VmFileName = vmFileName;
-            VmFileWorkingDirectory = SysUtil.GetRootPath.CheckTrailingSlash() + "vmFiles".CheckTrailingSlash();
-            DirectoryHandler = new DirectoryHandler(VmFileWorkingDirectory);
-            VmFileContent = vmFileContent;
+            Commands = commands;
+            DirectoryPathOfVmFiles = directoryPathOfVmFiles;
         }
 
         public void WriteFile()
         {
             try
             {
-                if (string.IsNullOrEmpty(VmFileName) && string.IsNullOrWhiteSpace(VmFileName))
-                {
-                    Console.WriteLine("file content is empty");
-                    throw new ArgumentException("fileName is empty");
-                }
-
-                var fileName = Path.GetFileNameWithoutExtension(VmFileName);
+                var fileName = new DirectoryInfo(DirectoryPathOfVmFiles).Name;
 
                 var file = CreateAsmFile(fileName);
 
-                File.WriteAllLines(file, VmFileContent);
+                File.WriteAllLines(file, Commands);
 
                 Console.WriteLine($"file created at : {file}");
             }
@@ -51,7 +39,7 @@ namespace VmToAssembler
 
         private string CreateAsmFile(string fileName)
         {
-            string file = DirectoryHandler.DirectoryVmFile + fileName + ".asm";
+            string file = DirectoryPathOfVmFiles.CheckTrailingSlash() + fileName + ".asm";
 
             file.CreateFileIfNotExists();
 

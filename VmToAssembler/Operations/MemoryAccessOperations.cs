@@ -8,7 +8,9 @@ public class MemoryAccessOperations
 {
     public Dictionary<string, List<string>> MemoryAccessOperation { get; }
 
-    private readonly int staticSegment = 16;
+    private const int StaticSegment = 16;
+
+    private int tempValue = 5;
 
     public MemoryAccessOperations()
     {
@@ -168,7 +170,7 @@ public class MemoryAccessOperations
         {
             "@R5",
             "D=M",
-            "@11",
+            "@replaced",
             "D=D+A",
             "@R13",
             "M=D",
@@ -208,7 +210,16 @@ public class MemoryAccessOperations
             "M=D"
         });
     }
-    
+
+    public List<string> GetPopTemp(string command)
+    {
+        var cmdSplit = command.SplitByWhitespace();
+
+        var tmpValue = tempValue + int.Parse(cmdSplit[2]);
+
+        return  MemoryAccessOperation.GetValueFromDictionary("pop temp").UpdateReplacedWithNewValue(tmpValue.ToString());
+    }
+
 
     public List<string> GetPush(string command)
     {
@@ -222,7 +233,7 @@ public class MemoryAccessOperations
         if (splitCommand[1].Contains("static"))
         {
             // calculate static value
-            var staticVal = int.Parse(splitCommand[2]) + staticSegment;
+            var staticVal = int.Parse(splitCommand[2]) + StaticSegment;
 
             var commands = MemoryAccessOperation.GetValueFromDictionary(splitCommand[0] + " " + splitCommand[1]);
 
@@ -280,11 +291,16 @@ public class MemoryAccessOperations
         if (splitCommand[1].Contains("static"))
         {
             // calculate static value
-            var staticVal = int.Parse(splitCommand[2]) + staticSegment;
+            var staticVal = int.Parse(splitCommand[2]) + StaticSegment;
 
             var commands = MemoryAccessOperation.GetValueFromDictionary(splitCommand[0] + " " + splitCommand[1]);
 
             return UpdateReplacedWithCorrectAddressValue(commands, staticVal.ToString());
+        }
+
+        if (splitCommand[1].Contains("temp"))
+        {
+            return GetPopTemp(vmCommand);
         }
 
         return GetCommandsBasedOnFirstTwoWords(splitCommand);

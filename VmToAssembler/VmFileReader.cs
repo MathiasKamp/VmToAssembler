@@ -2,41 +2,54 @@
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using VmToAssembler.Utils;
 
 namespace VmToAssembler
 {
     public class VmFileReader
     {
-        private string VmFileToRead { get; }
-        public List<string> VmFileContent { get; private set; }
+        private string[] VmFilesToRead { get; }
+        
+        public Dictionary<string, List<string>> VmFileContents { get; }
 
         private readonly Regex commentRegex =
             new(@"(@(?:""[^""]*"")+|""(?:[^""\n\\]+|\\.)*""|'(?:[^'\n\\]+|\\.)*')|//.*|/\*(?s:.*?)\*/");
 
-        public VmFileReader(string vmFileToRead)
+        public VmFileReader(string[] vmFilesToRead)
         {
-            VmFileToRead = vmFileToRead;
-            VmFileContent = new List<string>();
-            ReadVmFile();
+            VmFilesToRead = vmFilesToRead;
+            VmFileContents = new Dictionary<string, List<string>>();
+            ReadVmFiles();
         }
 
-        private void ReadVmFile()
+        private void ReadVmFiles()
         {
-            var fileContent = File.ReadAllLines(VmFileToRead)
-                .Where(arg => !string.IsNullOrWhiteSpace(arg) || !string.IsNullOrEmpty(arg)).ToList();
+            foreach (var file in VmFilesToRead)
+            {
+                var vmFile = File.ReadAllLines(file)
+                    .Where(arg => !string.IsNullOrWhiteSpace(arg) || !string.IsNullOrEmpty(arg)).ToList();
 
-            if (!fileContent.Any()) return;
+                var fileName = file.GetFileNameFromFullPath();
 
-            VmFileContent = fileContent;
+                if (!vmFile.Any())
+                {
+                    return;
+                }
 
-            TrimFileContent();
+                vmFile = TrimFileContent(vmFile);
+
+                VmFileContents.Add(fileName, vmFile);
+            }
+
         }
 
-        private void TrimFileContent()
+        private List<string> TrimFileContent(List<string> vmFile)
         {
-            VmFileContent = RemoveCommentsFromAsm(VmFileContent);
-            VmFileContent = TrimWhiteSpaces(VmFileContent);
-            VmFileContent = RemoveEmptyLines(VmFileContent);
+            vmFile = RemoveCommentsFromAsm(vmFile);
+            vmFile = TrimWhiteSpaces(vmFile);
+            vmFile = RemoveEmptyLines(vmFile);
+
+            return vmFile;
         }
 
         private static List<string> TrimWhiteSpaces(List<string> content)
@@ -57,10 +70,6 @@ namespace VmToAssembler
         {
             return fileContent.Select(str => commentRegex.Replace(str, "")).ToList();
         }
-
-        public bool HasFunction()
-        {
-            return VmFileContent.Any(str => str.StartsWith("function"));
-        }
+        
     }
 }

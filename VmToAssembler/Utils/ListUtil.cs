@@ -18,4 +18,11 @@ public static class ListUtil
             ? new List<string>()
             : list.Select(cmd => cmd.Replace("replaced", newValue)).ToList();
     }
+    
+    public static List<string> UpdateStrWithNewValue(this List<string> list, string oldValue, string newValue)
+    {
+        return !list.Any()
+            ? new List<string>()
+            : list.Select(cmd => cmd.Replace(oldValue, newValue)).ToList();
+    }
 }

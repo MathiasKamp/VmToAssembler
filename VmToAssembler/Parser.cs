@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using VmToAssembler.Operations;
 using VmToAssembler.Utils;
 
@@ -8,9 +9,8 @@ namespace VmToAssembler
     {
         private VmFileReader VmFileReader { get; }
 
-        private List<string> RawVmFileContent { get; }
 
-        private List<string> VmTranslatedToAsm { get; }
+        public List<string> VmTranslatedToAsm { get; }
 
         private LogicalOperations LogicalOperations { get; }
 
@@ -19,24 +19,23 @@ namespace VmToAssembler
 
         private MemoryAccessOperations MemoryAccessOperations { get; }
 
-
         private CounterHandler CounterHandler { get; }
 
         private LabelOperations LabelOperations { get; }
 
         private GotoOperations GotoOperations { get; }
 
-        private bool HasFunction { get; }
+        private bool FirstFile { get; set; }
 
         private SysOperations SysOperations { get; }
-        
+
         private FunctionOperations FunctionOperations { get; }
 
+        private Dictionary<string, List<string>> rawFileContent { get; }
 
-        public Parser(string file)
+        public Parser(string[] files)
         {
-            VmFileReader = new VmFileReader(file);
-            HasFunction = VmFileReader.HasFunction();
+            VmFileReader = new VmFileReader(files);
             LogicalOperations = new LogicalOperations();
             SpOperations = new SpOperations();
             SysOperations = new SysOperations();
@@ -45,8 +44,9 @@ namespace VmToAssembler
             LabelOperations = new LabelOperations();
             GotoOperations = new GotoOperations();
             CounterHandler = new CounterHandler();
-            RawVmFileContent = VmFileReader.VmFileContent;
+            rawFileContent = VmFileReader.VmFileContents;
             VmTranslatedToAsm = new List<string>();
+            FirstFile = false;
         }
 
 
@@ -130,17 +130,24 @@ namespace VmToAssembler
             return SysOperations.GetReturn();
         }
 
+        public void ParseVmFilesToAsm()
+        {
+            if (!FirstFile)
+            {
+                VmTranslatedToAsm.MergeLists(SysOperations.GetStartWithLabel());
+                FirstFile = true;
+            }
 
-        public List<string> ParseVmToAsm()
+            foreach (var fileContent in rawFileContent.Select(file => file.Value))
+            {
+                ParseVmToAsm(fileContent);
+            }
+        }
+
+        private void ParseVmToAsm(List<string> fileContent)
 
         {
-            // add start with or without a return label
-            VmTranslatedToAsm.MergeLists(HasFunction
-                ? SysOperations.GetStartWithLabel()
-                : SysOperations.GetStartWithoutLabel());
-
-
-            foreach (var vmCommand in RawVmFileContent)
+            foreach (var vmCommand in fileContent)
             {
                 if (vmCommand.StartsWith("push"))
                 {
@@ -216,25 +223,33 @@ namespace VmToAssembler
                 {
                     VmTranslatedToAsm.MergeLists(HandleFunction(vmCommand));
                 }
-                
+
                 else if (vmCommand.StartsWith("return"))
                 {
                     VmTranslatedToAsm.MergeLists(HandleReturn());
                 }
-            }
 
-            return VmTranslatedToAsm;
+                else if (vmCommand.StartsWith("call"))
+                {
+                    VmTranslatedToAsm.MergeLists(HandleCall(vmCommand));
+                }
+            }
+        }
+
+        private List<string> HandleCall(string vmCommand)
+        {
+            return SysOperations.GetCall(vmCommand);
         }
 
         private List<string> HandleFunction(string vmCommand)
         {
             var splitCommand = vmCommand.SplitByWhitespace();
-            
-            var label = splitCommand[1];
-            
-            LabelOperations.AddToLabels(label,label);
 
-            var labelCommand = LabelOperations.GetLabelValueList(label,true);
+            var label = splitCommand[1];
+
+            LabelOperations.AddToLabels(label, label);
+
+            var labelCommand = LabelOperations.GetLabelValueList(label, true);
 
             return labelCommand.MergeLists(FunctionOperations.GetFunctionOperations(int.Parse(splitCommand[2])));
         }

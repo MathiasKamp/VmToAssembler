@@ -71,7 +71,7 @@ public static class FileUtil
         return fileMoved;
     }
 
-    public static string GetFileNameFromFullPath(string file)
+    public static string GetFileNameFromFullPath(this string file)
     {
         if (!CheckIfFileExists(file))
         {

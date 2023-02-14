@@ -28,4 +28,14 @@ public static class DirUtil
     {
         return directory.EndsWith(@"\") ? directory : directory + @"\";
     }
+
+    /*
+     * returns true of path is directory otherwise false
+     */
+    public static bool PathIsDirectory(this string path)
+    {
+        FileAttributes attr = File.GetAttributes(path);
+
+        return attr.HasFlag(FileAttributes.Directory);
+    }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Reflection.Emit;
 using VmToAssembler.Utils;
 
 namespace VmToAssembler.Operations;
@@ -7,11 +6,15 @@ namespace VmToAssembler.Operations;
 public class LabelOperations
 {
     private Dictionary<string, string> Labels { get; }
+    
+    
 
     public LabelOperations()
     {
         Labels = new Dictionary<string, string>();
     }
+
+    
 
     public List<string> GetLabelValueList(string key, bool doWrapInParenthesis)
     {
@@ -23,15 +26,15 @@ public class LabelOperations
         };
     }
 
-    public string GetLabelValue(string key, bool shouldWrapWithParenthesis)
+    public string GetLabelValue(string key, bool doWrapInParenthesis)
     {
-        if (!shouldWrapWithParenthesis) return Labels.GetValueFromDict(key);
+        if (!doWrapInParenthesis) return Labels.GetValueFromDict(key);
         
         var label = Labels.GetValueFromDict(key);
 
         return "(" + label + ")";
     }
-
+    
     // might return boolean if added
     public void AddToLabels(string key, string value)
     {
